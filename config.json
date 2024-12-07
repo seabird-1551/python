@@ -1,0 +1,157 @@
+mappings/raw_compass_program_map.json
+{
+    "Mapping": {
+        "MappingName": "raw_compass_program_map",
+        "SourceSystemID": "compass",
+        "SourceEntityID": "program",
+        "SourceSchemaName": "d409compass",
+        "SourceTableName": "program",
+        "TargetDatabaseName": "raw_compass",
+        "TargetTableName": "program",
+        "SourceTableType": "table",
+        "SourceExtractType": "full",
+        "TargetLoadType": "overwrite",
+        "SourceColumns": [],
+        "QueryList": [],
+        "KeyColumns": []
+    }
+}
+
+--master yarn \
+--packages "org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.3.1" \
+--jars /opt/nabu/nabu-spark-bots/jars/ojdbc8.jar \
+--conf "spark.finopsENV.src_sys_key=compass" \
+--conf "spark.finopsENV.environment=Validation" \
+--conf "spark.finopsENV.config_name=raw_compass_env_config.json" \
+--conf "spark.finopsENV.config_path=configs/" \
+--conf "spark.finopsENV.mapping_name=raw_compass_program_map.json" \
+--conf "spark.finopsENV.mapping_path=mappings/" \
+--conf "spark.finopsENV.mapping_type=table" \
+--conf "spark.ui.enabled=false" \
+--executor-cores 1 \
+--num-executors 1 \
+--driver-memory 1g \
+--executor-memory 1g \
+--files /opt/nabu/nabu-spark-bots/kerberos/log4j2.properties \
+--conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:///opt/nabu/nabu-spark-bots/kerberos/log4j2.properties" \
+--conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=file:///opt/nabu/nabu-spark-bots/kerberos/log4j2.properties" \
+
+
+// configs/default_iceberg_table_prop.json
+{
+    "Development":{   
+            "format-version" : "2", 
+            "write.update.mode" : "copy-on-write", 
+            "write.merge.mode" : "merge-on-read", 
+            "read.parquet.vectorization.enabled" : "true", 
+            "write.format.default" : "parquet", 
+            "write.delete.format.default" : "avro", 
+            "write.metadata.delete-after-commit.enabled" : "true", 
+            "write.metadata.previous-versions-max" : "30", 
+            "write.metadata.metrics.default" : "none", 
+            "write.object-storage.enabled" : "true",
+            "engine.hive.enabled":"true",
+            "history.expire.min-snapshots-to-keep" : "30",
+            "history.expire.max-snapshot-age-ms" : "259200000"
+    },
+    "Validation":{
+        "format-version" : "2", 
+        "write.update.mode" : "copy-on-write", 
+        "write.merge.mode" : "merge-on-read", 
+        "read.parquet.vectorization.enabled" : "true", 
+        "write.format.default" : "parquet", 
+        "write.delete.format.default" : "avro", 
+        "write.metadata.delete-after-commit.enabled" : "true", 
+        "write.metadata.previous-versions-max" : "50", 
+        "write.metadata.metrics.default" : "none", 
+        "write.object-storage.enabled" : "true",
+        "engine.hive.enabled":"true",
+        "history.expire.min-snapshots-to-keep" : "100",
+        "history.expire.max-snapshot-age-ms" : "518400000"
+    },
+    "Production":{
+        "format-version" : "2",
+        "write.update.mode" : "copy-on-write",
+        "write.merge.mode" : "merge-on-read",
+        "read.parquet.vectorization.enabled" : "true",
+        "write.format.default" : "parquet",
+        "write.delete.format.default" : "avro",
+        "write.metadata.delete-after-commit.enabled" : "true",
+        "write.metadata.previous-versions-max" : "100",
+        "write.metadata.metrics.default" : "none",
+        "write.object-storage.enabled" : "true",
+        "engine.hive.enabled":"true",
+        "history.expire.min-snapshots-to-keep" : "200",
+        "history.expire.max-snapshot-age-ms" : "1209600000"
+    }
+}
+
+
+// configs/raw_compass_env_config.json
+{
+    "DomainName":"FinOps",
+    "LayerName":"raw_compass",
+    "Development":{
+        "SourceConnectionName":"RAW_ORACLE_COMPASS",
+        "SourceJdbcUrl":"jdbc:oracle:thin:@UQ00143D.ABBVIENET.COM:1521/FMSFCNT1.PPG",
+        "SourceJdbcDriverName":"oracle.jdbc.driver.OracleDriver",        
+        "NabuAuditConnection": {
+            "ConnectionName":"nabu_rds_audit_users",
+            "DatabaseHostName":"nabu-dataverse-instance-1.cvoqvkvm02vq.us-east-1.rds.amazonaws.com",
+            "DatabaseName":"nabu_jobs_audit",
+            "AuditTableName":"extraction.extraction_jobs_audit",
+            "MaintenanceTableName":"extraction.extraction_maintenance_jobs_audit",
+            "DatabasePortNo":5432
+        },
+        "FinopsAuditConnection":{
+            "RepositoryDatabase":"raw_compass",
+            "EltSourceSystemDefTable":"elt_src_sys_load_def",
+            "EltSourceEntityDefTable":"elt_src_entity_load_def",
+            "EltSourceEntityLoadHistTable":"elt_src_entity_load_hist",
+            "EltSourceEntityLoadArchiveTable":"elt_src_entity_load_hist_arch",
+            "EltProcessRunLogTable":"elt_run_messages"
+        }	
+    },
+    "Validation":{
+        "SourceConnectionName":"RAW_ORACLE_COMPASS",
+        "SourceJdbcUrl":"jdbc:oracle:thin:@UQ00143D.ABBVIENET.COM:1521/FMSFCNT1.PPG",
+        "SourceJdbcDriverName":"oracle.jdbc.driver.OracleDriver",
+        "NabuAuditConnection": {
+            "ConnectionName":"nabu_rds_audit_users",
+            "DatabaseHostName":"nabu-dataverse-instance-1.cshtuy3nv1f9.us-east-1.rds.amazonaws.com",
+            "DatabaseName":"nabu_jobs_audit",
+            "AuditTableName":"extraction.extraction_jobs_audit",
+            "MaintenanceTableName":"extraction.extraction_maintenance_jobs_audit",
+            "DatabasePortNo":5432
+        },
+        "FinopsAuditConnection":{
+            "RepositoryDatabase":"raw_compass",
+            "EltSourceSystemDefTable":"elt_src_sys_load_def",
+            "EltSourceEntityDefTable":"elt_src_entity_load_def",
+            "EltSourceEntityLoadHistTable":"elt_src_entity_load_hist",
+            "EltSourceEntityLoadArchiveTable":"elt_src_entity_load_hist_arch",
+            "EltProcessRunLogTable":"elt_run_messages"
+        }	
+    },
+    "Production":{
+        "SourceConnectionName":"RAW_ORACLE_COMPASS",
+        "SourceJdbcUrl":"jdbc:oracle:thin:@uq00174p.abbvienet.com:1521/FMSLCNP1.PPG",
+        "SourceJdbcDriverName":"oracle.jdbc.driver.OracleDriver",
+        "NabuAuditConnection": {
+            "ConnectionName":"nabu_rds_audit_users",
+            "DatabaseHostName":"nabu-dataverse-instance-1.c39c6otmd5ym.us-east-1.rds.amazonaws.com",
+            "DatabaseName":"nabu_jobs_audit",
+            "AuditTableName":"extraction.extraction_jobs_audit",
+            "MaintenanceTableName":"extraction.extraction_maintenance_jobs_audit",
+            "DatabasePortNo":5432
+        },
+        "FinopsAuditConnection":{
+            "RepositoryDatabase":"raw_compass",
+            "EltSourceSystemDefTable":"elt_src_sys_load_def",
+            "EltSourceEntityDefTable":"elt_src_entity_load_def",
+            "EltSourceEntityLoadHistTable":"elt_src_entity_load_hist",
+            "EltSourceEntityLoadArchiveTable":"elt_src_entity_load_hist_arch",
+            "EltProcessRunLogTable":"elt_run_messages"
+        }	
+    }   
+}
